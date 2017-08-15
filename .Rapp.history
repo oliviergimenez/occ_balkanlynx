@@ -1,0 +1,1066 @@
+plot(grid, col=cols[findInterval(occup_pred, brks, all.inside=TRUE)])
+plot(grid, col=cols[findInterval(occup_pred, brks, all.inside=TRUE)],lwd=.2)
+legend("bottomright", legend=1,col=cols[findInterval(occup_pred, brks, all.inside=TRUE)], cex=0.5, bty="n")
+legend("bottomright", legend=cols,col=cols[findInterval(occup_pred, brks, all.inside=TRUE)], cex=0.5, bty="n")
+dens
+legend("bottomright", legend=dens,col=cols[findInterval(occup_pred, brks, all.inside=TRUE)], cex=0.5, bty="n")
+legend("bottomright", col=cols[findInterval(occup_pred, brks, all.inside=TRUE)], cex=0.5, bty="n")
+image(occup_pred)
+occup_pred
+spplot(grid, "PrCpInc", main = "Palo Alto Demographics", sub = "Average Per Capita Income", #
+    col = "transparent")
+?sppplot
+?spplot
+spplot(grid, zcol=occup_pred)
+occup_pred
+grid@data$Forest_Cov
+grid
+spplot(grid, zcol=occ_new)
+spplot(grid, Forest_Cov)
+spplot(grid, "Forest_Cov")
+grid@data$occ_new = occup_pred#
+grid@data$occ_lb = occup_lower#
+grid@data$occ_ub = occup_upper#
+head(grid@data)#
+writeOGR(obj=grid, dsn=".", layer="Grid_10km_Balkan_Forest_Cover_Percentage_Corine_with_occupancy_v6", driver="ESRI Shapefile")
+grid@data$occ_new = occup_pred#
+grid@data$occ_lb = occup_lower#
+grid@data$occ_ub = occup_upper#
+head(grid@data)#
+writeOGR(obj=grid, dsn=".", layer="Grid_10km_Balkan_Forest_Cover_Percentage_Corine_with_occupancy_v7", driver="ESRI Shapefile")
+spplot(grid, "occ_new", main = "estimated occ prob", sub = "",col = "transparent")
+my.palette <- brewer.pal(n = 7, name = "OrRd")
+par(mfrow=c(1,3))#
+spplot(grid, "occup_lower", col.regions = my.palette, cuts = 6, main = "lower limit CI", col = "transparent")#
+spplot(grid, "occ_lb", col.regions = my.palette, cuts = 6, main = "estimated occ prob", col = "transparent")#
+spplot(grid, "occup_upper", col.regions = my.palette, cuts = 6, main = "upper limit CI", col = "transparent")
+my.palette <- brewer.pal(n = 7, name = "OrRd")#
+par(mfrow=c(1,3))#
+spplot(grid, "occ_lb", col.regions = my.palette, cuts = 6, main = "lower limit CI", col = "transparent")#
+spplot(grid, "occ_new", col.regions = my.palette, cuts = 6, main = "estimated occ prob", col = "transparent")#
+spplot(grid, "occ_ub", col.regions = my.palette, cuts = 6, main = "upper limit CI", col = "transparent")
+library(BAMMtools)
+occu_discretized_limits = getJenksBreaks(occup_pred, 7)
+occu_discretized_limits
+spplot(grid, "occ_new", col.regions = my.palette, at = occu_discretized_limits, main = "estimated occ prob", col = "transparent")
+lynx <- read.csv("20170504_BaselineSurvey_Modified_East_MKD.csv", sep=";", header = T, colClasses = "character")
+head(lynx)
+grid <- readOGR("/Users/gimenez/Dropbox/OG/BOULOT/GENS/Alexandros KARAMANLIDIS/Balkan_lynx/occupancy_v6", "BS_GRID10km_LynxPresence_Covariates_20170504_Modified_E_MKD")#
+head(grid@data)#
+names(head(grid@data))
+head(grid@data)
+grid@data
+grid@data[, NumAnswer]
+grid@data[, 'NumAnswer']
+grid@data[, 'NumAnswer']>0
+grid@data[, 'NumAnswer']>0grid@data[, 'NumAnswer']
+grid@data[, 'NumAnswer']==0
+grid@data[, 'NumAnswer']!=0
+sum(grid@data[, 'NumAnswer']!=0)
+spplot(grid, c("occ_lb","occ_new","occ_ub"), col.regions = my.palette, cuts = 6, main = c("lower limit CI",'estimated occ',"upper limit CI"), col = "transparent")
+grid
+# load packages#
+library(rgdal)  #
+library(RColorBrewer)  #
+library(raster)#
+library(maptools)#
+library(rgeos)#
+library(sp)#
+library(unmarked)#
+library(rjags)#
+#
+# read in data: in rows = questionees, in columns = grid cells#
+lynx <- read.csv("20170504_BaselineSurvey_Modified_East_MKD.csv", sep=";", header = T, colClasses = "character") #
+head(lynx) #
+dim(lynx)#
+names(lynx)#
+cell_labels = colnames(lynx)[-c(1,2,3,4)]#
+#
+# get presence_max#
+pres_max <- lynx[,4]#
+#
+# get quality_prof#
+quality_prof <- lynx[,2]#
+#
+# get quality_estim#
+quality_estim <- as.numeric(lynx[,3])#
+#
+# get labels for Questionee#
+quest <- lynx[,1]#
+# fill in the blanks with 0s and delete first column of questionees#
+lynx <- lynx[,-c(1,2,3,4)]#
+head(lynx) #
+lynx <- replace(lynx, lynx =="",'NA') # no sampling#
+# numerical conversion#
+tp <- dim(lynx)#
+tp#
+lynx <- as.matrix(lynx) #
+lynx <- matrix(as.numeric(lynx),nrow=tp[1],ncol=tp[2],byrow=F) #
+dim(lynx)#
+head(lynx)#
+#
+# sites are in rows and sampling occasions in columns!#
+lynx = t(lynx)#
+dim(lynx) # 394 grid cells, 1375 interviewees#
+#
+# read in grid for relevant countries 10km2 x 10km2#
+# from Vasko#
+grid <- readOGR("/Users/gimenez/Dropbox/OG/BOULOT/GENS/Alexandros KARAMANLIDIS/Balkan_lynx/occupancy_v6", "BS_GRID10km_LynxPresence_Covariates_20170504_Modified_E_MKD")#
+head(grid@data)#
+names(head(grid@data))#
+# [1] "Id"         "X_Cent"     "Y_Cent"     "Label"      "Forest_Cov"#
+# [6] "occ"        "NumAnswer"  "occ_new"    "Presenc"    "PresencMod"#
+# [11] "Ruggedness" "Altitude"  #
+#
+print(proj4string(grid))#
+#
+# check labels of polygons#
+row.names(grid)#
+grid@data$Label#
+levels(grid@data$Label)#
+#
+# get forest cover and sampling effort (proxy of) values for each cell of the grid#
+forest_cover = NULL#
+samp_eff = NULL#
+alti = NULL#
+rug = NULL#
+for (i in cell_labels){#
+	mask = (grid@data$Label == i)#
+	if (sum(mask)==0) print(i) # which cells do not have forest cover?#
+	forest_cover = c(forest_cover,grid@data$Forest_Cov[mask])#
+	samp_eff = c(samp_eff,grid@data$NumAnswer[mask])#
+	alti = c(alti,grid@data$Altitude[mask])#
+	rug = c(rug,grid@data$Ruggedness[mask])#
+}#
+#
+mean_fc = mean(forest_cover)#
+sd_fc = sd(forest_cover)#
+forest_cover = as.numeric(scale(forest_cover))#
+#
+mean_alti = mean(alti)#
+sd_alti = sd(alti)#
+alti = as.numeric(scale(alti))#
+#
+mean_rug = mean(rug)#
+sd_rug = sd(rug)#
+rug = as.numeric(scale(rug))#
+#
+samp_eff = as.numeric(scale(samp_eff))#
+quality_estim = as.numeric(scale(quality_estim))#
+#
+cor.test(alti,rug)#
+cor.test(alti,forest_cover)#
+cor.test(forest_cover,rug)#
+plot(alti,rug)#
+plot(alti,forest_cover)#
+plot(rug,forest_cover)#
+#
+#----------#
+tempo_mask = (cell_labels == 'DL73' | cell_labels == 'DL74')#
+lynx = lynx[!tempo_mask,]#
+dim(lynx)#
+#----------#
+#
+# explore data#
+# how many sites with non-detections and detections#
+apply(lynx==0,1,sum,na.rm=T)#
+apply(lynx==1,1,sum,na.rm=T)#
+# all sites have at least one detection or one non-detection#
+apply(lynx==0,1,sum,na.rm=T) + apply(lynx==1,1,sum,na.rm=T) > 0#
+# nb obs (0s and 1s) per site#
+apply(lynx==0,1,sum,na.rm=T) + apply(lynx==1,1,sum,na.rm=T)
+# big model: #
+# - occupancy: linear effect of forest cover and ruggedness, quadratic effect of altitude#
+# - detection: linear effect of forest cover and ruggedness#
+#
+# prepare data for occupancy analysis#
+lynx_occ = unmarkedFrameOccu(lynx)#
+head(lynx_occ)#
+siteCovs(lynx_occ) <- data.frame(forest_cover = forest_cover, samp_eff = samp_eff, rug= rug,alti=alti)#
+obsCovs(lynx_occ) <- data.frame(quality_estim = quality_estim)#
+#
+numSites(lynx_occ)#
+obsNum(lynx_occ)#
+#
+# occupancy analysis#
+fm <- occu(~ samp_eff + quality_estim + forest_cover + rug ~ forest_cover + rug + alti + I(alti^2), lynx_occ)#
+# fit all possible combinations#
+library(MuMIn)
+load('dd.RData')
+ind = (is.na(dd[,'psi(alti)']) + !is.na(dd[,'psi(I(alti^2))']))#
+mask = (ind==2)#
+dd2 = dd[!mask,]#
+dd2[1:10,]
+length(rownames(dd2)) # nb of models we run
+round(coef(dd2),2)
+res = model.avg(dd2, subset = delta < 4)#
+#
+summary(res)
+confint(res)
+bb
+occup_pred = NULL#
+occup_lower = NULL#
+occup_upper = NULL#
+for (i in 1:length(grid@data$Forest_Cov)){#
+	l_psi = (1.508555 -0.8573843 * ((grid@data$Forest_Cov[i]-mean_fc)/sd_fc) + 1.205667 * ((grid@data$Ruggedness[i]-mean_rug)/sd_rug) -0.3388781 * ((grid@data$Altitude[i]-mean_alti)/sd_alti) -0.1818641 * ((grid@data$Altitude[i]-mean_alti)/sd_alti)^2)#
+	se_lpsi = sqrt(0.26336^2 + ((grid@data$Forest_Cov[i]-mean_fc)/sd_fc)^2 * 0.29626^2 + ((grid@data$Ruggedness[i]-mean_rug)/sd_rug)^2 * 0.38331^2 + ((grid@data$Altitude[i]-mean_alti)/sd_alti)^2 * 0.27161^2 + (((grid@data$Altitude[i]-mean_alti)/sd_alti)^2)^2 * 0.10435^2)#
+	temp = 1/(1+exp(-l_psi))#
+	templ = 1/(1+exp(-(l_psi - 1.96 * se_lpsi)))#
+	tempu = 1/(1+exp(-(l_psi + 1.96 * se_lpsi)))#
+	occup_pred = c(occup_pred,temp)#
+	occup_lower = c(occup_lower,templ)#
+	occup_upper = c(occup_upper,tempu)#
+}#
+#
+# show estimated occ with conf int#
+cbind(occup_lower, occup_pred, occup_upper)
+# add predicted occ to shp file#
+grid@data$occ_new = occup_pred#
+grid@data$occ_lb = occup_lower#
+grid@data$occ_ub = occup_upper#
+head(grid@data)#
+writeOGR(obj=grid, dsn=".", layer="Grid_10km_Balkan_Forest_Cover_Percentage_Corine_with_occupancy_v7", driver="ESRI Shapefile")
+writeOGR(obj=grid, dsn=".", layer="Grid_10km_Balkan_Forest_Cover_Percentage_Corine_with_occupancy_v8", driver="ESRI Shapefile")
+grid
+my.palette <- brewer.pal(n = 7, name = "OrRd")
+spplot(grid, c("occ_lb","occ_new","occ_ub"), col.regions = my.palette, cuts = 6, main = c("lower limit CI",'estimated occ',"upper limit CI"), col = "transparent")
+spplot(grid, c("occ_lb","occ_new","occ_ub"), col.regions=terrain.colors(255), main = c("lower limit CI",'estimated occ',"upper limit CI"), col = "transparent")
+N = 10
+my.palette <- brewer.pal(n = N, name = "OrRd")
+N = 9
+my.palette <- brewer.pal(n = N, name = "OrRd")
+spplot(grid, c("occ_lb","occ_new","occ_ub"), col.regions = my.palette, cuts = N-1, main = c("lower limit CI",'estimated occ',"upper limit CI"), col = "transparent")
+# maps (http://www.nickeubank.com/wp-content/uploads/2015/10/RGIS3_MakingMaps_part1_mappingVectorData.html)#
+N = 9#
+my.palette <- brewer.pal(n = N, name = "OrRd")#
+trellis.par.set(axis.line=list(col=NA))#
+spplot(grid, c("occ_lb","occ_new","occ_ub"), col.regions = my.palette, cuts = N-1, main = c("lower limit CI",'estimated occ',"upper limit CI"), col = "transparent")
+spplot(grid, c("occ_lb","occ_new","occ_ub"), col.regions = my.palette, cuts = N-1, main = c("lower limit CI",'estimated occ',"upper limit CI"), col = "transparent")
+?print.trellis
+p11 <- histogram( ~ height | voice.part, data = singer, xlab="Height")#
+p12 <- densityplot( ~ height | voice.part, data = singer, xlab = "Height")#
+p2 <- histogram( ~ height, data = singer, xlab = "Height")#
+## simple positioning by spl
+print(p11, split=c(1,1,1,2), more=TRUE)
+print(p2, split=c(1,2,1,2))
+print(p11, position = c(0,0,.75,.75), split=c(1,1,1,2), more=TRUE)#
+print(p12, position = c(0,0,.75,.75), split=c(1,2,1,2), more=TRUE)#
+print(p2, position = c(.5,.75,1,1), more=FALSE)#
+#
+## Using seekViewport
+print(p11, split=c(1,1,3,1), more=TRUE)
+p1 = spplot(grid, c("occ_lb"), col.regions = my.palette, cuts = N-1, main = c("lower limit CI"), col = "transparent")
+p2 = spplot(grid, c("occ_new"), col.regions = my.palette, cuts = N-1, main = c('estimated occ'), col = "transparent")
+p3 = spplot(grid, c("occ_ub"), col.regions = my.palette, cuts = N-1, main = c("upper limit CI"), col = "transparent")
+print(p1, split=c(1,1,3,1), more=TRUE)
+print(p1, split=c(2,1,3,1), more=TRUE)
+print(p1, split=c(1,1,3,1), more=TRUE)#
+print(p2, split=c(2,1,3,1), more=TRUE)#
+print(p3, split=c(3,1,3,1))
+print(p1, split=c(1,1,3,2), more=TRUE)#
+print(p2, split=c(2,1,3,2), more=TRUE)#
+print(p3, split=c(3,1,3,2))#
+print(p3, split=c(2,2,3,2))
+print(p1, split=c(1,1,3,2), more=TRUE)#
+print(p2, split=c(2,1,3,2), more=TRUE)#
+print(p3, split=c(3,1,3,2), more=TRUE)#
+print(p3, split=c(2,2,3,2))
+?update
+spplot(grid, c("occ_lb","occ_new"), col.regions = my.palette, cuts = N-1)
+spplot(grid, c("occ_lb","occ_new","occ_ub"), col.regions = my.palette, cuts = N-1)
+N = 9#
+my.palette <- brewer.pal(n = N, name = "OrRd")#
+p1 = spplot(grid, c("occ_lb"), col.regions = my.palette, cuts = N-1, main = c("lower limit CI"), col = "transparent")#
+p2 = spplot(grid, c("occ_new"), col.regions = my.palette, cuts = N-1, main = c('estimated occ'), col = "transparent")#
+p3 = spplot(grid, c("occ_ub"), col.regions = my.palette, cuts = N-1, main = c("upper limit CI"), col = "transparent")#
+print(p1, split=c(1,1,3,2), more=TRUE)#
+print(p2, split=c(2,1,3,2), more=TRUE)#
+print(p3, split=c(3,1,3,2), more=TRUE)#
+print(p3, split=c(2,2,3,2))
+p2
+str(p2)
+names(p2)
+p2$legend
+N = 9#
+my.palette <- brewer.pal(n = N, name = "OrRd")#
+p2 = spplot(grid, c("occ_new"), col.regions = my.palette, cuts = N-1, main = c('estimated occ'), col = "transparent")#
+p1 = spplot(grid, c("occ_lb"), col.regions = my.palette, at = p2$legend$right$args$key$at, main = c("lower limit CI"), col = "transparent")#
+p3 = spplot(grid, c("occ_ub"), col.regions = my.palette, at = p2$legend$right$args$key$at, main = c("upper limit CI"), col = "transparent")
+print(p1, split=c(1,1,3,2), more=TRUE)#
+print(p2, split=c(2,1,3,2), more=TRUE)#
+print(p3, split=c(3,1,3,2), more=TRUE)#
+print(p3, split=c(2,2,3,2))
+p2$legend$right$args$key$at
+seq(0.1,1,10)
+at = seq(0.1,1,length=10)
+at
+at_regular = seq(0.1,1,length=10)
+N = 9
+at_regular = seq(0.1,1,length=10)
+p2 = spplot(grid, c("occ_new"), col.regions = my.palette, at = at_regular, main = c('estimated occ'), col = "transparent")
+p2$legend$right$args$key$at
+p1 = spplot(grid, c("occ_lb"), col.regions = my.palette, at = p2$legend$right$args$key$at, main = c("lower limit CI"), col = "transparent")#
+p3 = spplot(grid, c("occ_ub"), col.regions = my.palette, at = p2$legend$right$args$key$at, main = c("upper limit CI"), col = "transparent")#
+print(p1, split=c(1,1,3,2), more=TRUE)#
+print(p2, split=c(2,1,3,2), more=TRUE)#
+print(p3, split=c(3,1,3,2), more=TRUE)#
+print(p3, split=c(2,2,3,2))
+at_regular = seq(0,1,length=10)
+at_regular
+N = 9#
+at_regular = seq(0,1,length=10)#
+#p2$legend$right$args$key$at#
+my.palette <- brewer.pal(n = N, name = "OrRd")#
+#p2 = spplot(grid, c("occ_new"), col.regions = my.palette, cuts = N-1, main = c('estimated occ'), col = "transparent")#
+p2 = spplot(grid, c("occ_new"), col.regions = my.palette, at = at_regular, main = c('estimated occ'), col = "transparent")#
+p1 = spplot(grid, c("occ_lb"), col.regions = my.palette, at = p2$legend$right$args$key$at, main = c("lower limit CI"), col = "transparent")#
+p3 = spplot(grid, c("occ_ub"), col.regions = my.palette, at = p2$legend$right$args$key$at, main = c("upper limit CI"), col = "transparent")#
+print(p1, split=c(1,1,3,2), more=TRUE)#
+print(p2, split=c(2,1,3,2), more=TRUE)#
+print(p3, split=c(3,1,3,2), more=TRUE)#
+print(p3, split=c(2,2,3,2))
+at_regular
+grid_fig1 <- readOGR("/Users/gimenez/Dropbox/OG/BOULOT/GENS/Alexandros KARAMANLIDIS/Balkan_lynx/occupancy_v6", "Probability_Occurence_BS_Only_V4_Final")
+head(grid_fig1@data)
+names(head(grid_fig1@data))
+print(proj4string(grid))
+row.names(grid_fig1)
+grid_fig1@data$Label
+levels(grid@data$Label)
+levels(grid_fig1@data$Label)
+length(grid_fig1@data$Label)
+grid_fig1
+grid_fig1@data$Label
+grid@data$Label %in% grid_fig1@data$Label
+sum(grid@data$Label %in% grid_fig1@data$Label)
+grid@data$Label %in% grid_fig1@data$Label
+grid[grid@data$Label %in% grid_fig1@data$Label]
+grid[grid@data$Label %in% grid_fig1@data$Label,]
+grid2 = grid[grid@data$Label %in% grid_fig1@data$Label,]
+grid2
+grid = grid[grid@data$Label %in% grid_fig1@data$Label,]
+grid
+N = 9#
+at_regular = seq(0,1,length=10)#
+#p2$legend$right$args$key$at#
+my.palette <- brewer.pal(n = N, name = "OrRd")#
+#p2 = spplot(grid, c("occ_new"), col.regions = my.palette, cuts = N-1, main = c('estimated occ'), col = "transparent")#
+p2 = spplot(grid, c("occ_new"), col.regions = my.palette, at = at_regular, main = c('estimated occ'), col = "transparent")#
+p1 = spplot(grid, c("occ_lb"), col.regions = my.palette, at = p2$legend$right$args$key$at, main = c("lower limit CI"), col = "transparent")#
+p3 = spplot(grid, c("occ_ub"), col.regions = my.palette, at = p2$legend$right$args$key$at, main = c("upper limit CI"), col = "transparent")#
+print(p1, split=c(1,1,3,2), more=TRUE)#
+print(p2, split=c(2,1,3,2), more=TRUE)#
+print(p3, split=c(3,1,3,2), more=TRUE)
+print(p1, split=c(1,1,3,1), more=TRUE)#
+print(p2, split=c(2,1,3,1), more=TRUE)#
+print(p3, split=c(3,1,3,1))
+library(rgdal)  #
+library(RColorBrewer)  #
+library(raster)#
+library(maptools)#
+library(rgeos)#
+library(sp)#
+library(unmarked)#
+library(rjags)#
+#
+# read in data: in rows = questionees, in columns = grid cells#
+lynx <- read.csv("20170504_BaselineSurvey_Modified_East_MKD.csv", sep=";", header = T, colClasses = "character") #
+head(lynx) #
+dim(lynx)#
+names(lynx)#
+cell_labels = colnames(lynx)[-c(1,2,3,4)]#
+#
+# get presence_max#
+pres_max <- lynx[,4]#
+#
+# get quality_prof#
+quality_prof <- lynx[,2]#
+#
+# get quality_estim#
+quality_estim <- as.numeric(lynx[,3])#
+#
+# get labels for Questionee#
+quest <- lynx[,1]#
+# fill in the blanks with 0s and delete first column of questionees#
+lynx <- lynx[,-c(1,2,3,4)]#
+head(lynx) #
+lynx <- replace(lynx, lynx =="",'NA') # no sampling#
+# numerical conversion#
+tp <- dim(lynx)#
+tp#
+lynx <- as.matrix(lynx) #
+lynx <- matrix(as.numeric(lynx),nrow=tp[1],ncol=tp[2],byrow=F) #
+dim(lynx)#
+head(lynx)#
+#
+# sites are in rows and sampling occasions in columns!#
+lynx = t(lynx)#
+dim(lynx) # 394 grid cells, 1375 interviewees#
+#
+# read in grid for relevant countries 10km2 x 10km2#
+# from Vasko#
+grid <- readOGR("/Users/gimenez/Dropbox/OG/BOULOT/GENS/Alexandros KARAMANLIDIS/Balkan_lynx/occupancy_v6", "BS_GRID10km_LynxPresence_Covariates_20170504_Modified_E_MKD")#
+head(grid@data)#
+names(head(grid@data))#
+# [1] "Id"         "X_Cent"     "Y_Cent"     "Label"      "Forest_Cov"#
+# [6] "occ"        "NumAnswer"  "occ_new"    "Presenc"    "PresencMod"#
+# [11] "Ruggedness" "Altitude"  #
+#
+print(proj4string(grid))#
+#
+# check labels of polygons#
+row.names(grid)#
+grid@data$Label#
+levels(grid@data$Label)#
+#
+# get forest cover and sampling effort (proxy of) values for each cell of the grid#
+forest_cover = NULL#
+samp_eff = NULL#
+alti = NULL#
+rug = NULL#
+for (i in cell_labels){#
+	mask = (grid@data$Label == i)#
+	if (sum(mask)==0) print(i) # which cells do not have forest cover?#
+	forest_cover = c(forest_cover,grid@data$Forest_Cov[mask])#
+	samp_eff = c(samp_eff,grid@data$NumAnswer[mask])#
+	alti = c(alti,grid@data$Altitude[mask])#
+	rug = c(rug,grid@data$Ruggedness[mask])#
+}#
+#
+mean_fc = mean(forest_cover)#
+sd_fc = sd(forest_cover)#
+forest_cover = as.numeric(scale(forest_cover))#
+#
+mean_alti = mean(alti)#
+sd_alti = sd(alti)#
+alti = as.numeric(scale(alti))#
+#
+mean_rug = mean(rug)#
+sd_rug = sd(rug)#
+rug = as.numeric(scale(rug))#
+#
+samp_eff = as.numeric(scale(samp_eff))#
+quality_estim = as.numeric(scale(quality_estim))
+cor.test(alti,rug)#
+cor.test(alti,forest_cover)#
+cor.test(forest_cover,rug)#
+plot(alti,rug)#
+plot(alti,forest_cover)#
+plot(rug,forest_cover)#
+#
+#----------#
+tempo_mask = (cell_labels == 'DL73' | cell_labels == 'DL74')#
+lynx = lynx[!tempo_mask,]#
+dim(lynx)#
+#----------#
+#
+# explore data#
+# how many sites with non-detections and detections#
+apply(lynx==0,1,sum,na.rm=T)#
+apply(lynx==1,1,sum,na.rm=T)#
+# all sites have at least one detection or one non-detection#
+apply(lynx==0,1,sum,na.rm=T) + apply(lynx==1,1,sum,na.rm=T) > 0#
+# nb obs (0s and 1s) per site#
+apply(lynx==0,1,sum,na.rm=T) + apply(lynx==1,1,sum,na.rm=T)#
+# big model: #
+# - occupancy: linear effect of forest cover and ruggedness, quadratic effect of altitude#
+# - detection: linear effect of forest cover and ruggedness#
+#
+# prepare data for occupancy analysis#
+lynx_occ = unmarkedFrameOccu(lynx)#
+head(lynx_occ)#
+siteCovs(lynx_occ) <- data.frame(forest_cover = forest_cover, samp_eff = samp_eff, rug= rug,alti=alti)#
+obsCovs(lynx_occ) <- data.frame(quality_estim = quality_estim)#
+#
+numSites(lynx_occ)#
+obsNum(lynx_occ)
+library(MuMIn)
+save(dd,file='dd.RData')
+load('dd.RData')#
+# drop models in which the quadratic term is included without the linear term#
+ind = (is.na(dd[,'psi(alti)']) + !is.na(dd[,'psi(I(alti^2))']))#
+mask = (ind==2)#
+dd2 = dd[!mask,]#
+dd2[1:10,]
+w
+length(rownames(dd2)) # nb of models we run
+citation('MuMIn')
+# load packages#
+library(rgdal)  #
+library(RColorBrewer)  #
+library(raster)#
+library(maptools)#
+library(rgeos)#
+library(sp)#
+library(unmarked)#
+library(rjags)#
+#
+# read in data: in rows = questionees, in columns = grid cells#
+lynx <- read.csv("20170504_BaselineSurvey_Modified_East_MKD.csv", sep=";", header = T, colClasses = "character") #
+head(lynx) #
+dim(lynx)#
+names(lynx)#
+cell_labels = colnames(lynx)[-c(1,2,3,4)]#
+#
+# get presence_max#
+pres_max <- lynx[,4]#
+#
+# get quality_prof#
+quality_prof <- lynx[,2]#
+#
+# get quality_estim#
+quality_estim <- as.numeric(lynx[,3])#
+#
+# get labels for Questionee#
+quest <- lynx[,1]#
+# fill in the blanks with 0s and delete first column of questionees#
+lynx <- lynx[,-c(1,2,3,4)]#
+head(lynx) #
+lynx <- replace(lynx, lynx =="",'NA') # no sampling#
+# numerical conversion#
+tp <- dim(lynx)#
+tp#
+lynx <- as.matrix(lynx) #
+lynx <- matrix(as.numeric(lynx),nrow=tp[1],ncol=tp[2],byrow=F) #
+dim(lynx)#
+head(lynx)#
+#
+# sites are in rows and sampling occasions in columns!#
+lynx = t(lynx)
+lynx
+save(lynx,file='lynx.RData')
+dim(lynx) # 394 grid cells, 1375 interviewees
+quality_estim
+lynx = data.frame(lynx_obs = lynx, level_expertise = quality_estim)
+library(rgdal)  #
+library(RColorBrewer)  #
+library(raster)#
+library(maptools)#
+library(rgeos)#
+library(sp)#
+library(unmarked)#
+library(rjags)#
+#
+# read in data: in rows = questionees, in columns = grid cells#
+lynx <- read.csv("20170504_BaselineSurvey_Modified_East_MKD.csv", sep=";", header = T, colClasses = "character") #
+head(lynx) #
+dim(lynx)#
+names(lynx)#
+cell_labels = colnames(lynx)[-c(1,2,3,4)]#
+#
+# get presence_max#
+pres_max <- lynx[,4]#
+#
+# get quality_prof#
+quality_prof <- lynx[,2]#
+#
+# get quality_estim#
+quality_estim <- as.numeric(lynx[,3])#
+#
+# get labels for Questionee#
+quest <- lynx[,1]#
+# fill in the blanks with 0s and delete first column of questionees#
+lynx <- lynx[,-c(1,2,3,4)]#
+head(lynx) #
+lynx <- replace(lynx, lynx =="",'NA') # no sampling#
+# numerical conversion#
+tp <- dim(lynx)#
+tp#
+lynx <- as.matrix(lynx) #
+lynx <- matrix(as.numeric(lynx),nrow=tp[1],ncol=tp[2],byrow=F) #
+dim(lynx)#
+head(lynx)#
+#
+# sites are in rows and sampling occasions in columns!#
+lynx = t(lynx)
+lynx = data.frame(lynx_obs = lynx, level_expertise = quality_estim)
+lynx_obs = lynx
+level_expertise = quality_estim
+save(lynx_obs, level_expertise,file='lynx.RData')
+dim(lynx) # 394 grid cells, 1375 interviewees
+# read in grid for relevant countries 10km2 x 10km2#
+# from Vasko#
+grid <- readOGR("/Users/gimenez/Dropbox/OG/BOULOT/GENS/Alexandros KARAMANLIDIS/Balkan_lynx/occupancy_v6", "BS_GRID10km_LynxPresence_Covariates_20170504_Modified_E_MKD")#
+head(grid@data)#
+names(head(grid@data))
+# read in grid for relevant countries 10km2 x 10km2#
+# from Vasko#
+grid <- readOGR("/Users/gimenez/Dropbox/OG/BOULOT/GENS/Alexandros KARAMANLIDIS/Balkan_lynx/occupancy_v6", "BS_GRID10km_LynxPresence_Covariates_20170504_Modified_E_MKD")#
+head(grid@data)#
+names(head(grid@data))#
+# [1] "Id"         "X_Cent"     "Y_Cent"     "Label"      "Forest_Cov"#
+# [6] "occ"        "NumAnswer"  "occ_new"    "Presenc"    "PresencMod"#
+# [11] "Ruggedness" "Altitude"  #
+#
+print(proj4string(grid))
+row.names(grid)#
+grid@data$Label#
+levels(grid@data$Label)
+grid$occ_new
+grid$occ_new = NULL
+names(head(grid@data))
+grid$occ = NULL
+names(head(grid@data))
+grid$presenc = NULL
+grid
+grid$Presenc = NULL
+grid
+grid$PresencMod = NULL
+grid
+writeOGR(obj=grid, dsn=".", layer="Grid_10km_Covariates", driver="ESRI Shapefile")
+grid_fig1 <- readOGR("/Users/gimenez/Dropbox/OG/BOULOT/GENS/Alexandros KARAMANLIDIS/Balkan_lynx/occupancy_github", "filter")
+filter = grid@data$Label %in% grid_fig1@data$Label
+filter
+grid$filter = filter
+writeOGR(obj=grid, dsn=".", layer="Grid_10km_Covariates", driver="ESRI Shapefile")
+level_expertise
+length(level_expertise)
+cell_labels
+# load packages#
+library(rgdal)  #
+library(RColorBrewer)  #
+library(raster)#
+library(maptools)#
+library(rgeos)#
+library(sp)#
+library(unmarked)#
+library(rjags)#
+#
+# read in data: in rows = questionees, in columns = grid cells#
+lynx <- read.csv("20170504_BaselineSurvey_Modified_East_MKD.csv", sep=";", header = T, colClasses = "character") #
+head(lynx) #
+dim(lynx)#
+names(lynx)#
+cell_labels = colnames(lynx)[-c(1,2,3,4)]#
+#
+# get presence_max#
+pres_max <- lynx[,4]#
+#
+# get quality_prof#
+quality_prof <- lynx[,2]#
+#
+# get quality_estim#
+quality_estim <- as.numeric(lynx[,3])#
+#
+# get labels for Questionee#
+quest <- lynx[,1]#
+# fill in the blanks with 0s and delete first column of questionees#
+lynx <- lynx[,-c(1,2,3,4)]#
+head(lynx) #
+lynx <- replace(lynx, lynx =="",'NA') # no sampling#
+# numerical conversion#
+tp <- dim(lynx)#
+tp#
+lynx <- as.matrix(lynx) #
+lynx <- matrix(as.numeric(lynx),nrow=tp[1],ncol=tp[2],byrow=F) #
+dim(lynx)#
+head(lynx)#
+#
+# sites are in rows and sampling occasions in columns!#
+lynx = t(lynx)
+tempo_mask = (cell_labels == 'DL73' | cell_labels == 'DL74')#
+lynx = lynx[!tempo_mask,]#
+dim(lynx)#
+#----------
+lynx_obs = lynx#
+level_expertise = quality_estim#
+#
+save(lynx_obs, level_expertise,file='lynx.RData')#
+dim(lynx) # 394 grid cells, 1375 interviewees
+# read in grid for relevant countries 10km2 x 10km2#
+# from Vasko#
+grid <- readOGR("/Users/gimenez/Dropbox/OG/BOULOT/GENS/Alexandros KARAMANLIDIS/Balkan_lynx/occupancy_github", "BS_GRID10km_LynxPresence_Covariates_20170504_Modified_E_MKD")#
+head(grid@data)#
+names(head(grid@data))#
+# [1] "Id"         "X_Cent"     "Y_Cent"     "Label"      "Forest_Cov"#
+# [6] "occ"        "NumAnswer"  "occ_new"    "Presenc"    "PresencMod"#
+# [11] "Ruggedness" "Altitude"  #
+#
+print(proj4string(grid))#
+#
+# check labels of polygons#
+row.names(grid)#
+grid@data$Label#
+levels(grid@data$Label)#
+#
+grid$occ_new = NULL#
+grid$occ = NULL#
+grid$Presenc = NULL#
+grid$PresencMod = NULL#
+#
+# get the cells used in Fig1#
+grid_fig1 <- readOGR("/Users/gimenez/Dropbox/OG/BOULOT/GENS/Alexandros KARAMANLIDIS/Balkan_lynx/occupancy_github", "filter")#
+# in grid, select only the sqares that are in grid_fig1#
+filter = grid@data$Label %in% grid_fig1@data$Label#
+grid$filter = filter
+writeOGR(obj=grid, dsn=".", layer="Grid_10km_Covariates", driver="ESRI Shapefile")
+library(rgdal)  #
+#library(RColorBrewer)  #
+#library(raster)#
+#library(maptools)#
+#library(rgeos)#
+library(sp)#
+library(unmarked)
+load('lynx.RData')
+lynx_obs
+dim(lynx_obs) # 392 grid cells, 1375 interviewees
+level_expertise
+grid <- readOGR(".", "Grid_10km_Covariates")
+head(grid@data)
+names(head(grid@data))
+print(proj4string(grid))
+# get forest cover and sampling effort (proxy of) values for each cell of the grid#
+forest_cover = NULL#
+samp_eff = NULL#
+alti = NULL#
+rug = NULL#
+for (i in cell_labels){#
+	mask = (grid@data$Label == i)#
+	if (sum(mask)==0) print(i) # which cells do not have forest cover?#
+	forest_cover = c(forest_cover,grid@data$Forest_Cov[mask])#
+	samp_eff = c(samp_eff,grid@data$NumAnswer[mask])#
+	alti = c(alti,grid@data$Altitude[mask])#
+	rug = c(rug,grid@data$Ruggedness[mask])#
+}
+# load packages#
+library(rgdal)  #
+library(RColorBrewer)  #
+library(raster)#
+library(maptools)#
+library(rgeos)#
+library(sp)#
+library(unmarked)#
+#
+# read in data: in rows = questionees, in columns = grid cells#
+lynx <- read.csv("/Users/gimenez/Dropbox/OG/BOULOT/GENS/Alexandros KARAMANLIDIS/Balkan_lynx/occupancy_v620170504_BaselineSurvey_Modified_East_MKD.csv", sep=";", header = T, colClasses = "character") #
+head(lynx) #
+dim(lynx)#
+names(lynx)#
+cell_labels = colnames(lynx)[-c(1,2,3,4)]
+# read in data: in rows = questionees, in columns = grid cells#
+lynx <- read.csv("/Users/gimenez/Dropbox/OG/BOULOT/GENS/Alexandros KARAMANLIDIS/Balkan_lynx/occupancy_v6/20170504_BaselineSurvey_Modified_East_MKD.csv", sep=";", header = T, colClasses = "character") #
+head(lynx) #
+dim(lynx)#
+names(lynx)#
+cell_labels = colnames(lynx)[-c(1,2,3,4)]
+cell_labels
+!tempo_mask
+library(rgdal)  #
+library(RColorBrewer)  #
+library(raster)#
+library(maptools)#
+library(rgeos)#
+library(sp)#
+library(unmarked)#
+#
+# read in data: in rows = questionees, in columns = grid cells#
+lynx <- read.csv("/Users/gimenez/Dropbox/OG/BOULOT/GENS/Alexandros KARAMANLIDIS/Balkan_lynx/occupancy_v6/20170504_BaselineSurvey_Modified_East_MKD.csv", sep=";", header = T, colClasses = "character") #
+head(lynx) #
+dim(lynx)#
+names(lynx)#
+cell_labels = colnames(lynx)[-c(1,2,3,4)]#
+#
+# get presence_max#
+pres_max <- lynx[,4]#
+#
+# get quality_prof#
+quality_prof <- lynx[,2]#
+#
+# get quality_estim#
+quality_estim <- as.numeric(lynx[,3])#
+#
+# get labels for Questionee#
+quest <- lynx[,1]#
+# fill in the blanks with 0s and delete first column of questionees#
+lynx <- lynx[,-c(1,2,3,4)]#
+head(lynx) #
+lynx <- replace(lynx, lynx =="",'NA') # no sampling#
+# numerical conversion#
+tp <- dim(lynx)#
+tp#
+lynx <- as.matrix(lynx) #
+lynx <- matrix(as.numeric(lynx),nrow=tp[1],ncol=tp[2],byrow=F) #
+dim(lynx)#
+head(lynx)
+lynx = t(lynx)
+#----------#
+tempo_mask = (cell_labels == 'DL73' | cell_labels == 'DL74')#
+lynx = lynx[!tempo_mask,]#
+cell_labels = cell_labels[!tempo_mask]#
+dim(lynx)#
+#----------
+lynx_obs = lynx#
+level_expertise = quality_estim
+save(lynx_obs, level_expertise,cell_labels,file='lynx.RData')
+dim(lynx) # 392 grid cells, 1375 interviewees
+#-- load packages#
+library(rgdal)  #
+#library(RColorBrewer)  #
+#library(raster)#
+#library(maptools)#
+#library(rgeos)#
+library(sp)#
+library(unmarked)#
+#
+#-- load lynx det/non-det and interviewees' level of expertise#
+load('lynx.RData')#
+lynx_obs#
+dim(lynx_obs) # 392 grid cells, 1375 interviewees#
+# note: there are more cells than in Fig 1 of the paper due the extra cells #
+#       that have been added with the area of knowledge#
+level_expertise
+ls()
+#-- read in grid 10km2 x 10km2 and site covariates#
+grid <- readOGR(".", "Grid_10km_Covariates")#
+head(grid@data)#
+print(proj4string(grid))#
+#
+# get forest cover and sampling effort (proxy of) values for each cell of the grid#
+forest_cover = NULL#
+samp_eff = NULL#
+alti = NULL#
+rug = NULL#
+for (i in cell_labels){#
+	mask = (grid@data$Label == i)#
+	if (sum(mask)==0) print(i) # which cells do not have forest cover?#
+	forest_cover = c(forest_cover,grid@data$Forest_Cov[mask])#
+	samp_eff = c(samp_eff,grid@data$NumAnswer[mask])#
+	alti = c(alti,grid@data$Altitude[mask])#
+	rug = c(rug,grid@data$Ruggedness[mask])#
+}
+mask
+sum(mask)
+grid@data$Label
+length(grid@data$Label)
+length(cell_labels)
+#-- load packages#
+library(rgdal)  #
+#library(RColorBrewer)  #
+#library(raster)#
+#library(maptools)#
+#library(rgeos)#
+library(sp)#
+library(unmarked)#
+#
+#-- load lynx det/non-det and interviewees' level of expertise#
+load('lynx.RData')#
+lynx_obs#
+dim(lynx_obs) # 392 grid cells, 1375 interviewees#
+# note: there are more cells than in Fig 1 of the paper due the extra cells #
+#       that have been added with the area of knowledge#
+level_expertise#
+cell_labels#
+#
+#-- read in grid 10km2 x 10km2 and site covariates#
+grid <- readOGR(".", "Grid_10km_Covariates")#
+head(grid@data)#
+print(proj4string(grid))#
+#
+# get forest cover, sampling effort (number of interviewees), altitude and rugosity#
+# for each cell of the grid#
+forest_cover = NULL#
+samp_eff = NULL#
+alti = NULL#
+rug = NULL#
+for (i in cell_labels){#
+	mask = (grid@data$Label == i)#
+	forest_cover = c(forest_cover,grid@data$Forest_Cov[mask])#
+	samp_eff = c(samp_eff,grid@data$NumAnswer[mask])#
+	alti = c(alti,grid@data$Altitude[mask])#
+	rug = c(rug,grid@data$Ruggedness[mask])#
+}
+#-- load packages#
+library(rgdal)  #
+#library(RColorBrewer)  #
+#library(raster)#
+#library(maptools)#
+#library(rgeos)#
+library(sp)#
+library(unmarked)#
+#
+#-- load lynx det/non-det and interviewees' level of expertise#
+load('lynx.RData')#
+lynx_obs#
+dim(lynx_obs) # 392 grid cells, 1375 interviewees#
+# note: there are more cells than in Fig 1 of the paper due the extra cells #
+#       that have been added with the area of knowledge#
+level_expertise#
+cell_labels#
+#
+#-- read in grid 10km2 x 10km2 and site covariates#
+grid <- readOGR(".", "Grid_10km_Covariates")#
+head(grid@data)#
+print(proj4string(grid))#
+#
+# get forest cover, sampling effort (number of interviewees), altitude and rugosity#
+# for each cell of the grid#
+forest_cover = NULL#
+samp_eff = NULL#
+alti = NULL#
+rug = NULL#
+for (i in cell_labels){#
+	mask = (grid@data$Label == i)#
+	forest_cover = c(forest_cover,grid@data$Forest_Cov[mask])#
+	samp_eff = c(samp_eff,grid@data$NumAnswer[mask])#
+	alti = c(alti,grid@data$Altitude[mask])#
+	rug = c(rug,grid@data$Ruggedness[mask])#
+}#
+#
+# standardize and store mean/sd#
+mean_fc = mean(forest_cover)#
+sd_fc = sd(forest_cover)#
+forest_cover = (forest_cover-mean_fc)/sd_fc#
+#
+mean_alti = mean(alti)#
+sd_alti = sd(alti)#
+alti = (alti-mean_al	ti)/sd_alti#
+#
+mean_rug = mean(rug)#
+sd_rug = sd(rug)#
+rug = (rug-mean_rug)/sd_rug#
+#
+samp_eff = as.numeric(scale(samp_eff))#
+level_expertise = as.numeric(scale(level_expertise))
+#-- load packages#
+library(rgdal)  #
+#library(RColorBrewer)  #
+#library(raster)#
+#library(maptools)#
+#library(rgeos)#
+library(sp)#
+library(unmarked)#
+#
+#-- load lynx det/non-det and interviewees' level of expertise#
+load('lynx.RData')#
+lynx_obs#
+dim(lynx_obs) # 392 grid cells, 1375 interviewees#
+# note: there are more cells than in Fig 1 of the paper due the extra cells #
+#       that have been added with the area of knowledge#
+level_expertise#
+cell_labels#
+#
+#-- read in grid 10km2 x 10km2 and site covariates#
+grid <- readOGR(".", "Grid_10km_Covariates")#
+head(grid@data)#
+print(proj4string(grid))#
+#
+# get forest cover, sampling effort (number of interviewees), altitude and rugosity#
+# for each cell of the grid#
+forest_cover = NULL#
+samp_eff = NULL#
+alti = NULL#
+rug = NULL#
+for (i in cell_labels){#
+	mask = (grid@data$Label == i)#
+	forest_cover = c(forest_cover,grid@data$Forest_Cov[mask])#
+	samp_eff = c(samp_eff,grid@data$NumAnswer[mask])#
+	alti = c(alti,grid@data$Altitude[mask])#
+	rug = c(rug,grid@data$Ruggedness[mask])#
+}
+# standardize and store mean/sd#
+mean_fc = mean(forest_cover)#
+sd_fc = sd(forest_cover)#
+forest_cover = (forest_cover-mean_fc)/sd_fc
+mean_alti = mean(alti)#
+sd_alti = sd(alti)#
+alti = (alti-mean_alti)/sd_alti
+mean_rug = mean(rug)#
+sd_rug = sd(rug)#
+rug = (rug-mean_rug)/sd_rug#
+#
+samp_eff = as.numeric(scale(samp_eff))#
+level_expertise = as.numeric(scale(level_expertise))
+lynx_occ = unmarkedFrameOccu(lynx_obs)#
+head(lynx_occ)
+siteCovs(lynx_occ) <- data.frame(forest_cover = forest_cover, samp_eff = samp_eff, rug= rug,alti=alti)#
+obsCovs(lynx_occ) <- data.frame(quality_estim = quality_estim)
+obsCovs(lynx_occ) <- data.frame(quality_estim = level_expertise)
+numSites(lynx_occ)#
+obsNum(lynx_occ)
+library(MuMIn)
+load('dd.RData')
+# drop models in which the quadratic term is included without the linear term#
+ind = (is.na(dd[,'psi(alti)']) + !is.na(dd[,'psi(I(alti^2))']))#
+mask = (ind==2)#
+dd2 = dd[!mask,]
+dd2[1:10,]
+round(dd2[1:10,],1)
+dd2[1:10,]
+length(rownames(dd2))
+round(coef(dd2),2)
+round(coef(dd2),2)
+res = model.avg(dd2, subset = delta < 2)
+res
+summary(res)
+res = model.avg(dd2, subset = delta < 4)
+summary(res)
+res = model.avg(dd2, subset = delta < 2)
+summary(res)
+confint(res)
+grid@data
+nrow(grid@data)
+length(grid@data$Forest_Cov)
+#-- predict occupancy everywhere#
+#   and get lower/upper bounds of 95% conf int#
+occup_pred = NULL#
+occup_lower = NULL#
+occup_upper = NULL#
+for (i in 1:nrow(grid@data)){#
+	l_psi = 1.508555 -0.8573843 * ((grid@data$Forest_Cov[i]-mean_fc)/sd_fc) + 1.205667 * ((grid@data$Ruggedness[i]-mean_rug)/sd_rug) -0.3388781 * ((grid@data$Altitude[i]-mean_alti)/sd_alti) -0.1818641 * ((grid@data$Altitude[i]-mean_alti)/sd_alti)^2#
+	se_lpsi = sqrt(0.26336^2 + ((grid@data$Forest_Cov[i]-mean_fc)/sd_fc)^2 * 0.29626^2 + ((grid@data$Ruggedness[i]-mean_rug)/sd_rug)^2 * 0.38331^2 + ((grid@data$Altitude[i]-mean_alti)/sd_alti)^2 * 0.27161^2 + (((grid@data$Altitude[i]-mean_alti)/sd_alti)^2)^2 * 0.10435^2)#
+	temp = 1/(1+exp(-l_psi))#
+	templ = 1/(1+exp(-(l_psi - 1.96 * se_lpsi)))#
+	tempu = 1/(1+exp(-(l_psi + 1.96 * se_lpsi)))#
+	occup_pred = c(occup_pred,temp)#
+	occup_lower = c(occup_lower,templ)#
+	occup_upper = c(occup_upper,tempu)#
+}
+cbind(occup_lower, occup_pred, occup_upper)
+N = 9#
+at_regular = seq(0,1,length=N+1)#
+my.palette <- brewer.pal(n = N, name = "OrRd")#
+p1 = spplot(grid, c("occ_lb"), col.regions = my.palette, at = at_regular, main = c("lower limit CI"), col = "transparent")#
+p2 = spplot(grid, c("occ_new"), col.regions = my.palette, at = at_regular, main = c('estimated occ'), col = "transparent")#
+p3 = spplot(grid, c("occ_ub"), col.regions = my.palette, at = at_regular, main = c("upper limit CI"), col = "transparent")
+library(RColorBrewer)
+N = 9#
+at_regular = seq(0,1,length=N+1)#
+my.palette <- brewer.pal(n = N, name = "OrRd")#
+p1 = spplot(grid, c("occ_lb"), col.regions = my.palette, at = at_regular, main = c("lower limit CI"), col = "transparent")#
+p2 = spplot(grid, c("occ_new"), col.regions = my.palette, at = at_regular, main = c('estimated occ'), col = "transparent")#
+p3 = spplot(grid, c("occ_ub"), col.regions = my.palette, at = at_regular, main = c("upper limit CI"), col = "transparent")
+grid@data$occ_new = occup_pred#
+grid@data$occ_lb = occup_lower#
+grid@data$occ_ub = occup_upper
+grid
+N = 9#
+at_regular = seq(0,1,length=N+1)#
+my.palette <- brewer.pal(n = N, name = "OrRd")#
+p1 = spplot(grid, c("occ_lb"), col.regions = my.palette, at = at_regular, main = c("lower limit CI"), col = "transparent")#
+p2 = spplot(grid, c("occ_new"), col.regions = my.palette, at = at_regular, main = c('estimated occ'), col = "transparent")#
+p3 = spplot(grid, c("occ_ub"), col.regions = my.palette, at = at_regular, main = c("upper limit CI"), col = "transparent")
+print(p1, split=c(1,1,3,2), more=TRUE)#
+print(p2, split=c(2,1,3,2), more=TRUE)#
+print(p3, split=c(3,1,3,2))
+print(p1, split=c(1,1,3,1), more=TRUE)#
+print(p2, split=c(2,1,3,1), more=TRUE)#
+print(p3, split=c(3,1,3,1))
+print(p1, split=c(1,1,3,2), more=TRUE)#
+print(p2, split=c(2,2,3,2), more=TRUE)#
+print(p3, split=c(3,1,3,2))#
+#
+# note: to a
+print(p1, split=c(1,1,3,1), more=TRUE)#
+print(p2, split=c(2,1,3,1), more=TRUE)#
+print(p3, split=c(3,1,3,1))
+grid
+grid[filter==T]
+grid[grid$filter==T]
+grid$filter
+grid[grid$filter==1,]
+p1 = spplot(grid[grid$filter==1,], c("occ_lb"), col.regions = my.palette, at = at_regular, main = c("CI lower limit"), col = "transparent")#
+p2 = spplot(grid[grid$filter==1,], c("occ_new"), col.regions = my.palette, at = at_regular, main = c('estim occ'), col = "transparent")#
+p3 = spplot(grid[grid$filter==1,], c("occ_ub"), col.regions = my.palette, at = at_regular, main = c("CI upper limit"), col = "transparent")#
+print(p1, split=c(1,1,3,1), more=TRUE)#
+print(p2, split=c(2,1,3,1), more=TRUE)#
+print(p3, split=c(3,1,3,1))
