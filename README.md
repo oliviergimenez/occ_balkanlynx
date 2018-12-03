@@ -1,1 +1,3 @@
 # Occupancy analyses for Balkan lynx
+
+This repository contains the data and code to reproduce the occupancy analyses in our paper: [Using questionnaire surveys and occupancy modelling to identify conservation priorities for the Critically Endangered Balkan lynx Lynx lynx balcanicus](https://www.cambridge.org/core/journals/oryx/article/using-questionnaire-surveys-and-occupancy-modelling-to-identify-conservation-priorities-for-the-critically-endangered-balkan-lynx-lynx-lynx-balcanicus/F6A07DB92A1D32EB3057E641AF52C43D/share/49a0a6fe6efa36ab289456d90fd8aa9c0f277fe1#) by Melovski et al. (2018) published in Oryx.
